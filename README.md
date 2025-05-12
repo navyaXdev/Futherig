@@ -20,8 +20,8 @@ A modern, feature-rich terminal emulator with a professional look and advanced f
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/futuristic_terminal.git
-cd futuristic_terminal
+git clone https://github.com/navyaXdev/Futherig.git
+cd Futherig
 ```
 
 2. Install required dependencies:
