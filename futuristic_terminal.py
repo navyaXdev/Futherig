@@ -28,6 +28,13 @@ import base64
 from rich.layout import Layout
 from rich.columns import Columns
 
+# Import pyfiglet for font rendering
+try:
+    import pyfiglet
+    PYFIGLET_AVAILABLE = True
+except ImportError:
+    PYFIGLET_AVAILABLE = False
+
 # Initialize colorama for Windows
 if platform.system() == 'Windows':
     colorama.init()
@@ -1862,6 +1869,7 @@ def load_banner_config():
         'title': 'Professional Terminal',
         'subtitle': 'Press TAB for smart completion',
         'show_info': True,
+        'banner_font': 'Standard',  # Default font
         'info_items': {
             'OS': True,
             'Shell': True,
@@ -1954,6 +1962,7 @@ def reset_configuration():
             'title': 'Professional Terminal',
             'subtitle': 'Press TAB for smart completion',
             'show_info': True,
+            'banner_font': 'Standard',  # Default font
             'info_items': {
                 'OS': True,
                 'Shell': True,
@@ -2061,29 +2070,232 @@ def customize_banner():
     print("4. Configure system information")
     print("5. Add custom information")
     print("6. Set banner image")
+    print("7. Select font for banner text")
     print("0. Back to main menu")
     
     while True:
-        choice = input("\nEnter your choice (0-6): ")
+        choice = input("\nEnter your choice (0-7): ")
         
         if choice == '1':
             print("\nYou can use ASCII art or plain text for your banner.")
             print("Example of ASCII art generator websites: patorjk.com/software/taag/")
+            
+            # Get current configuration
+            config_file = os.path.join(os.path.expanduser('~'), '.terminal_banner_config.json')
+            try:
+                with open(config_file, 'r') as f:
+                    config = json.load(f)
+            except Exception:
+                config = {}
+                
+            # Get current font if any
+            current_font = config.get('banner_font', 'Standard')
+            
+            # Show font preview message if pyfiglet is available
+            if PYFIGLET_AVAILABLE:
+                print(f"\nCurrent font: {current_font}")
+                print("Enter your banner text below and it will be automatically converted to ASCII art")
+                print("using the selected font. Leave empty to keep current banner.")
+            
             new_text = input("\nEnter new banner text (or press Enter to keep current):\n")
             
             if new_text.strip():
-                # Save banner text
-                config_file = os.path.join(os.path.expanduser('~'), '.terminal_banner_config.json')
-                try:
-                    with open(config_file, 'r') as f:
-                        config = json.load(f)
-                except Exception:
-                    config = {}
+                # If pyfiglet is available, convert the text to the selected font
+                if PYFIGLET_AVAILABLE:
+                    try:
+                        # Get the selected font
+                        font_name = config.get('banner_font', 'Standard')
+                        # Convert text to ASCII art
+                        ascii_art = pyfiglet.figlet_format(new_text, font=font_name)
+                        # Preview the result
+                        print("\nPreview of your banner text:\n")
+                        print(ascii_art)
+                        # Ask for confirmation
+                        confirm = input("\nUse this banner text? (y/n): ").lower()
+                        if confirm != 'y':
+                            continue
+                        # Save the converted text
+                        config['banner_text'] = ascii_art
+                    except Exception as e:
+                        print(f"\nError generating ASCII art: {e}")
+                        print("Using plain text instead.")
+                        config['banner_text'] = new_text
+                else:
+                    # No pyfiglet, use plain text
+                    config['banner_text'] = new_text
                 
-                config['banner_text'] = new_text
                 with open(config_file, 'w') as f:
                     json.dump(config, f, indent=4)
                 print("\nBanner text saved successfully!")
+            
+        elif choice == '7':
+            print("\n=== Banner Font Selection ===")
+            
+            if not PYFIGLET_AVAILABLE:
+                print("\nThe pyfiglet library is not installed. To enable font selection,")
+                print("please install it with: pip install pyfiglet")
+                print("Then restart the terminal application.")
+                continue
+            
+            # List of available fonts
+            available_fonts = [
+                "3D Diagonal", "Alpha", "Acrobatic", "Avatar", "Babyface", "Big Money-ne", "Big Money-nw", 
+                "Big Money-se", "Big Money-sw", "Big Blocks", "BlurVision", "Bulbhead", "Cards", "Chiseled", 
+                "Crawford2", "Crazy", "Dancing Font", "DiamFont", "Doh", "Doom", "Efti Wall", "Epic", 
+                "Fire Font-k", "Fire Font-s", "Flower Power", "Fun Face", "Ghost", "Graceful", "Graffiti", 
+                "Impossible", "Isometric1", "Isometric2", "Isometric3", "Isometric4", "JS Bracket Letters", 
+                "Lil Devil", "Merlin1", "Miniwi", "Modular", "Ogre", "Patorjk's Cheese", "Patorjk-HeX", 
+                "Rectangles", "RubiFont", "Shaded Blocky", "Slant", "Small", "Soft", "Standard", "Star Wars", 
+                "Sub-Zero", "Swamp Land", "Sweet", "Tmplr", "Train", "Twisted", "Varsity", "3D-ASCII", 
+                "ANSI Regular", "ANSI Shadow", "Bloody", "Calvin S", "Delta Corps Priest 1", "Electronic", 
+                "Elite", "Stronger Than All", "THIS", "The Edge", "1Row", "3-D", "3x5", "4Max", "5 Line Oblique", 
+                "AMC 3 Line", "AMC 3 Liv1", "AMC AAA01", "AMC Neko", "AMC Razor", "AMC Razor2", "AMC Slash", 
+                "AMC Slider", "AMC Thin", "AMC Tubes", "AMC Untitled", "ASCII New Roman", "Alligator", 
+                "Alligator2", "Alphabet", "Arrows", "Banner", "Banner3-D", "Banner3", "Banner4", "Barbwire", 
+                "Basic", "Bear", "Bell", "Benjamin", "Big Chief", "Bigfig", "Binary", "Block", "Bolger", 
+                "Braced", "Bright", "Broadway KB", "Broadway", "Bubble", "Caligraphy", "Caligraphy2", 
+                "Catwalk", "Chunky", "Coinstak", "Cola", "Colossal", "Computer", "Contessa", "Contrast", 
+                "Cosmike", "Crawford", "Cricket", "Cursive", "Cyberlarge", "Cybermedium", "Cybersmall", 
+                "Cygnet", "DANC4", "DWhistled", "Decimal", "Def Leppard", "Diamond", "Diet Cola", "Digital", 
+                "Dot Matrix", "Double Shorts", "Double", "Dr Pepper", "Efti Chess", "Efti Font", "Efti Italic", 
+                "Efti Piti", "Efti Robot", "Efti Water", "Fender", "Filter", "Flipped", "Four Tops", "Fraktur", 
+                "Fuzzy", "Georgi16", "Georgia11", "Ghoulish", "Glenyn", "Goofy", "Gothic", "Gradient", "Greek", 
+                "Heart Left", "Heart Right", "Henry 3D", "Hex", "Hieroglyphs", "Hollywood", "Horizontal Left", 
+                "Horizontal Right", "ICL-1900", "Invita", "Italic", "Ivrit", "JS Block Letters", 
+                "JS Capital Curves", "JS Cursive", "JS Stick Letters", "Jacky", "Jazmine", "Jerusalem", 
+                "Katakana", "Kban", "Keyboard", "Knob", "LCD", "Larry 3D", "Lean", "Letters", "Line Blocks", 
+                "Linux", "Lockergnome", "Madrid", "Marquee", "Maxfour", "Merlin2", "Mike", "Mini", "Mirror", 
+                "Mnemonic", "Morse", "Moscow", "Mshebrew210", "Muzzle", "NScript", "NT Greek", "NV Script", 
+                "Nancyj-Fancy", "Nancyj-Underlined", "Nancyj", "Nipples", "O8", "OS2", "Octal", "Old Banner", 
+                "Pawp", "Peaks Slant", "Peaks", "Pebbles", "Pepper", "Poison"
+            ]
+            
+            # Get actual available fonts from pyfiglet
+            try:
+                pyfiglet_fonts = pyfiglet.FigletFont.getFonts()
+                # Filter the available_fonts list to only include fonts that are actually available
+                filtered_fonts = []
+                for font in available_fonts:
+                    # Convert font name to pyfiglet format (lowercase, replace spaces with underscores)
+                    pyfiglet_font_name = font.lower().replace(' ', '_').replace('-', '_')
+                    if pyfiglet_font_name in pyfiglet_fonts:
+                        filtered_fonts.append(font)
+                
+                if filtered_fonts:
+                    available_fonts = filtered_fonts
+                else:
+                    # If no fonts match, use the actual pyfiglet fonts
+                    available_fonts = pyfiglet_fonts
+            except Exception as e:
+                print(f"Error getting pyfiglet fonts: {e}")
+                # Continue with the default list
+            
+            try:
+                # Try to use rich for better display
+                from rich.console import Console
+                from rich.table import Table
+                from rich.panel import Panel
+                
+                console = Console()
+                
+                # Display a header
+                console.print("\n[bold cyan]Available Fonts[/bold cyan]")
+                
+                # Create a table to display fonts in columns
+                table = Table(title="[bold green]Font Selection[/bold green]")
+                table.add_column("ID", style="cyan", justify="right")
+                table.add_column("Font Name", style="yellow")
+                table.add_column("ID", style="cyan", justify="right")
+                table.add_column("Font Name", style="yellow")
+                
+                # Display fonts in two columns
+                half = (len(available_fonts) + 1) // 2
+                for i in range(half):
+                    if i + half < len(available_fonts):
+                        table.add_row(
+                            str(i + 1), available_fonts[i],
+                            str(i + half + 1), available_fonts[i + half]
+                        )
+                    else:
+                        table.add_row(
+                            str(i + 1), available_fonts[i],
+                            "", ""
+                        )
+                
+                console.print(table)
+                
+            except (ImportError, Exception):
+                # Fallback to simple display
+                print("\nAvailable Fonts:")
+                for i, font in enumerate(available_fonts, 1):
+                    print(f"{i}. {font}")
+            
+            # Get current config
+            config_file = os.path.join(os.path.expanduser('~'), '.terminal_banner_config.json')
+            try:
+                with open(config_file, 'r') as f:
+                    config = json.load(f)
+            except Exception:
+                config = {}
+            
+            # Get current font
+            current_font = config.get('banner_font', None)
+            if current_font:
+                print(f"\nCurrent font: {current_font}")
+            
+            # Prompt for font selection
+            try:
+                font_choice = input("\nEnter font number (1-{}) or name (0 to cancel): ".format(len(available_fonts)))
+                
+                if font_choice == '0':
+                    continue
+                
+                selected_font = None
+                try:
+                    # Try to interpret as a number
+                    font_index = int(font_choice) - 1
+                    if 0 <= font_index < len(available_fonts):
+                        selected_font = available_fonts[font_index]
+                except ValueError:
+                    # Try to interpret as a font name
+                    if font_choice in available_fonts:
+                        selected_font = font_choice
+                
+                if selected_font:
+                    # Save the selected font
+                    config['banner_font'] = selected_font
+                    
+                    # Prompt for sample text to display
+                    sample_text = input("\nEnter sample text to preview the font (or press Enter for default): ") or "Sample Text"
+                    
+                    # Show a preview of the font
+                    try:
+                        # Convert the selected font name to pyfiglet format if needed
+                        pyfiglet_font_name = selected_font.lower().replace(' ', '_').replace('-', '_')
+                        ascii_art = pyfiglet.figlet_format(sample_text, font=pyfiglet_font_name)
+                        print("\nPreview of font:\n")
+                        print(ascii_art)
+                        
+                        # Ask if they want to update the banner text
+                        update_banner = input("\nUpdate banner text with this font? (y/n): ").lower()
+                        if update_banner == 'y':
+                            new_text = input("\nEnter new banner text: ")
+                            if new_text.strip():
+                                # Generate the ASCII art and save it
+                                ascii_art = pyfiglet.figlet_format(new_text, font=pyfiglet_font_name)
+                                config['banner_text'] = ascii_art
+                    except Exception as e:
+                        print(f"\nError previewing font: {e}")
+                    
+                    # Save configuration
+                    with open(config_file, 'w') as f:
+                        json.dump(config, f, indent=4)
+                    
+                    print(f"\nFont '{selected_font}' selected and saved!")
+                else:
+                    print("\nInvalid font selection.")
+            except Exception as e:
+                print(f"\nError selecting font: {e}")
             
         elif choice == '2':
             print("\nAvailable styles:")
@@ -2311,7 +2523,7 @@ def customize_banner():
                     with open(config_file, 'w') as f:
                         json.dump(config, f, indent=4)
                     print("\nBanner image removed!")
-            
+                    
         elif choice == '0':
             break
         
