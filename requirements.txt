@@ -1,0 +1,4 @@
+prompt-toolkit>=3.0.0
+rich>=10.0.0
+colorama>=0.4.4
+Pillow>=8.0.0 
