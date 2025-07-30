@@ -68,10 +68,6 @@ The terminal can be customized in several ways:
    - Customize prompt appearance
    - Add custom information
 
-3. Image Support:
-   - Add PNG images
-   - Adjust image width
-   - Position images on the left side of the banner
 
 4. Font Selection:
    - Choose from a wide variety of ASCII art fonts
@@ -134,9 +130,7 @@ The terminal uses these configuration files:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
@@ -150,6 +144,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Dinesh Patra
 
-## Powered by
 
-Navya 
